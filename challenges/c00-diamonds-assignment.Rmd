@@ -1,7 +1,7 @@
 ---
 title: "Getting Started: Diamonds"
-author: "(Your name here)"
-date: 2020-
+author: "Kaman Chen"
+date: 2026-9-3
 output:
   github_document:
     toc: true
@@ -54,23 +54,32 @@ In this first stage, you will explore the `diamonds` dataset and document your o
 
 ```{r q1-task}
 ## TASK: Plot `price` vs `carat` below
-## Your code here!
+ggplot(diamonds)+ 
+  geom_point(aes(x = carat, y = price))
+```
 ```
 
 **Observations**:
-
-- (Write your observations here!)
+-The price of diamonds increases as the carat increases generally.
+-Most of the data points are concentrated between about 0.4 and 2.5 carats. As carat increase, the data point reduced and dispersed.
+-After 1 carat, diamonds appear a large range of prices.
+-Between 1 and 3 carats, most diamonds tend to be closer to the lower end of the carat range, like 1.0, 1.5 and others.
+-More data would help explain the reasons diamond of same carats weight vary on price.
 
 ### __q2__ Create a visualization showing variables `carat`, `price`, and `cut` simultaneously. Experiment with which variable you assign to which aesthetic (`x`, `y`, etc.) to find an effective visual.
 
-```{r q2-task}
-## TASK: Plot `price`, `carat`, and `cut` below
-## Your code here!
+```
+```{r}
+ggplot(diamonds)+ 
+  geom_point(aes(x = carat, y = price, color = cut))
 ```
 
 **Observations**:
 
-- (Write your observations here!)
+- Diamonds with ideal cut tend to have higher prices and fair cut have lower.
+- Larger carat weight of diamonds have high price even with fair cut.
+- Some cut of premium or good can sell a better price than ideal at a same carat weight.And there are some diamonds with fair cut have a high price. Most data would be explain the reason behind it. 
+-
 
 
 # Communication
