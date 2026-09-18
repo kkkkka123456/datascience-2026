@@ -334,38 +334,62 @@ and the simulated is higher.
 ``` r
 #Plot 1
 df_q2 %>%
-  ggplot(aes(x = Temp, y = VelocityVacuum)) +
-  geom_smooth()+
+  ggplot(mapping = aes(x = Temp, y = VelocityVacuum)) +
   geom_point()
 ```
-
-    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
 ![](c02-michelson-assignment_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 #plot 2
 df_q2 %>%
-  ggplot(aes(x = VelocityVacuum)) +
-  geom_histogram()
+  ggplot(aes(x = Temp)) + 
+  geom_bar()+
+  facet_wrap(~ Distinctness)
 ```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
 
 ![](c02-michelson-assignment_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
 
 ``` r
 #plot 3
 df_q2 %>%
-  ggplot(aes(x = VelocityVacuum, color = Distinctness)) +
-  geom_density()
+  ggplot(aes(x = Date, y = VelocityVacuum, color = Distinctness)) +
+  geom_point()
 ```
 
 ![](c02-michelson-assignment_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
 
+``` r
+df_q2 %>%
+  ggplot(aes(x = VelocityVacuum, color = Distinctness)) +
+  geom_density()
+```
+
+![](c02-michelson-assignment_files/figure-gfm/unnamed-chunk-2-4.png)<!-- -->
+
 **Observations**:
 
-- 
+- The first plot describes the relationship between temperature and
+  velocity. The plot show a slightly upward trend but most of the data
+  points are spread out. So, the relationship of temperature and
+  velocity is not obvious from the plot, which mean that there are other
+  factor impact the change.
+- The second plot is the Bar charts showing the number of images taken
+  at different temperature. Most of the good images were taken at around
+  80F, with the general range around 70F to 90F. The temperatures for
+  fair images are widely spread, but most stay in around 72F and 96F.
+  The poor images were mostly taken at temperatures below 70F. It shows
+  that images taken at higher temperature tend to be better image.
+- The third plot describes the velocity for each distinctness group over
+  time. It show that Most of the poor image (group 1) taken around Jun
+  16 with lower velocity range than other group. Velocity of poor and
+  fair image (group 1 and 2) is more spread out and good images
+  (group 3) is more concentrated.
+- The data suggests that the difference might relate to the Impact of
+  Equipment and the Environment, like the temperature and the image
+  distinctness. However, these graphs do not prove that these factors
+  caused the difference. There would be more condition that were not
+  recorded.
 
 ## Bibliography
 
