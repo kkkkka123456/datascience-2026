@@ -94,6 +94,7 @@ df_q1 %>%
   )%>%
   arrange(desc(Distinctness)) %>%
   knitr::kable()
+
 ```
 
 **Observations**:
