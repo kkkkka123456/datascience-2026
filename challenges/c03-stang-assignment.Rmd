@@ -67,8 +67,13 @@ Note that these data are not tidy! The data in this form are convenient for repo
 ```{r q1-task}
 ## TASK: Tidy `df_stang`
 df_stang_long <-
-  df_stang
-
+  df_stang %>% 
+  pivot_longer(
+    names_to = c(".value", "angle"),
+    cols = c(-thick, -alloy),
+    names_sep = "_" ) %>%
+    mutate(angle = as.integer(angle)) %>%
+    filter(E>=0, nu>=0)
 df_stang_long
 ```
 
@@ -102,20 +107,29 @@ print("Very good!")
 ### __q2__ Perform a basic EDA on the aluminum data *without visualization*. Use your analysis to answer the questions under *observations* below. In addition, add your own *specific* question that you'd like to answer about the data---you'll answer it below in q3.
 
 ```{r q2-task}
-##
+##```{r q2-task}
+## Basic EDA
+df_stang_long %>% 
+  glimpse()
+df_stang_long %>% 
+  summary()
+df_stang_long %>% 
+  count(angle)
+df_stang_long %>% 
+  count(thick)
 ```
 
 **Observations**:
 
 - Is there "one true value" for the material properties of Aluminum?
-  - (Your response here)
-- How many aluminum alloys are in this dataset? How do you know?
-  - (Your response here)
+  - yes, the summary and glimpse show the material properties E and nu change as angle and thick change.
+- How many aluminum alloys are in this data set? How do you know?
+  -  All of test pieces in the data set are the same alloy "al_24st". it show in the summary of the data set that the length equal 26 and N.unique is 1.
 - What angles were tested?
-  - (Your response here)
+  - degree 0, 45, and 90 were tested in the datas et. 
 - What thicknesses were tested?
-  - (Your response here)
-- (Write your own question here)
+  - Thickness of 0.022, 0.032, 0.064 and 0.081 were tested. 
+- How is the material properties E and nu related with thick? 
 
 ## Visualize
 <!-- ------------------------- -->
@@ -124,11 +138,23 @@ print("Very good!")
 
 ```{r q3-task}
 ## TASK: Investigate your question from q1 here
+df_stang_long %>%
+  ggplot(aes(x = factor(angle), y = E)) +
+    geom_boxplot() +
+    facet_wrap(~ thick)
+df_stang_long %>%
+  ggplot(aes(x = factor(angle), y = nu)) +
+    geom_boxplot() +
+    facet_wrap(~ thick)
+
 ```
 
 **Observations**:
-
-- (Address your question from q1 here)
+How is the material properties E and nu related with thick and angle? 
+- In the graph of E vs.angle and separate by thick, The value of E is highest for the thinnest test pieces of 0.022 and similar with different angle, especially angle with 0 degree. The test pieces of 0.032 and 0.064 have lower values and float with angles. 0.032 have similar value between different angles, and 0.064 have higher value with degree 0 and similar with the rest 2 angle. The E value of thickness 0.081 significant drop from around 10500 to around 10000 and it continue decrease as the degree of angle increase.
+- The impact of angle to E is small compared with thickness, it's hard to tell the relationship between angle and E with this graph.
+- In the graph of nu vs.angle and separate by thick, the value of nu varies with both thickness and angle. The 0.022 test pieces have the highest nu values with 45 degree of angle, the value drop significant in the 90 degree of angle. The 0.032 and 0.064 test pieces show similar nu values. 
+- The 0.081 test pieces have the lowest nu values. The nu value drop similar with the E-value. 
 
 ### __q4__ Consider the following statement:
 
@@ -147,10 +173,10 @@ df_stang_long %>%
 
 **Observations**:
 
-- Does this graph support or contradict the claim above?
-  - (Your response here)
+-Does this graph support or contradict the claim above?
+  - No, the graph show that different values of elastic value and the poisson ratio with different thickness, E is not constant. 
 - Is this evidence *conclusive* one way or another?
-  - (Your response here)
+  - No, the graph only show the change of thickness with value of E and nu. There might be other factor that impact the change of value like temperature. And the graph show the possible relationship between thickness and the materials properties only, didn't explain cause. 
 
 # References
 <!-- -------------------------------------------------- -->
