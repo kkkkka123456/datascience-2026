@@ -130,7 +130,7 @@ Look up the documentation for the function `tribble`, and figure out how to crea
 *Hint*: Adapt an example!
 
 ```{r}
-## Write your code here
+tribble( ~u, ~w, 1,  2, 3,  4)
 ```
 
 

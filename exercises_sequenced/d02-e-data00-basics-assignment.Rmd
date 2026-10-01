@@ -52,9 +52,13 @@ Some nomenclature:
 *Hint*: You can run `?diamonds` to get information on a built-in dataset.
 
 ```{r load-packages, eval=FALSE}
+?diamonds
 ```
 
 ### __q2__ Run `glimpse(diamonds)`; what variables does `diamonds` have?
+```{r}
+glimpse(diamonds)
+```
 
 
 ### __q3__ Run `summary(diamonds)`; what are the common values for each of the

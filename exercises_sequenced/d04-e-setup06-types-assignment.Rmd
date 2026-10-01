@@ -35,7 +35,7 @@ Any time we store data in a computer, we need to work with *types*. A type is a 
 However, we *can* "add" the letter "a" and the *string* "1":
 
 ```{r}
-str_c("a", "1")
+str_c("a"+"1")
 ```
 
 Thankfully, there are only a few data types we need to care about:
@@ -55,6 +55,9 @@ FALSE == 0
 ```{r}
 nihongo <- "私は大学生です" # "I'm a college student"
 nihongo
+```
+```{r}
+"a"
 ```
 
 ### Variables vs Strings

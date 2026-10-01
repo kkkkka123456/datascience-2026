@@ -26,11 +26,17 @@ Inspect the `diamonds` dataset. What do the `cut`, `color`, and `clarity` variab
 *Hint*: We learned how to inspect a dataset in `e-data-00-basics`!
 
 ```{r q1-task, eval=FALSE}
+? diamonds
 ```
+
 
 ### __q2__ Standard checks
 
 Use your "standard checks" to determine what variables the dataset has.
+```{r}
+glimpse(diamonds)
+summary(diamonds)
+```
 
 
 Now that we have the list of variables in the dataset, we know what we can visualize!
@@ -68,12 +74,24 @@ Let's practice: Adapt the code above to complet the task below.
 ### __q3__ Make your first ggplot
 
 Using `ggplot`, visualize `price` vs `carat` with points. What trend do you observe?
+```{r}
+ggplot(            # 1. Starting a ggplot
+  data = diamonds  # 2. Dataset to visualize
+) +                # 3. Adding elements to the plot
+  geom_point(      # 4. Geometry
+    mapping = aes( # 5. `Aes`thetic mapping
+      x = carat,   # 5.1. Mapping the `x` variable
+      y = price    # 5.2. Mapping the `y` variable
+    )
+  )
+```
 
 *Hint*: Usually the language `y` vs `x` refers to the `vertical axis` vs `horizontal axis`. This is the opposite order from the way we often specify `x, y` pairs. Language is hard!
 
 ```{r q3-task}
 ## TODO: Complete this code
-ggplot(diamonds)
+ggplot(diamonds)+ 
+  geom_point(aes(x = carat, y = price))
 ```
 
 **Observations**:

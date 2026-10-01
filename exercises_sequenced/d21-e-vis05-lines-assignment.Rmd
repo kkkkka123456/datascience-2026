@@ -79,6 +79,8 @@ The following graph doesn't work as its author intended. Based on what we learne
 ```{r q1-task}
 ## TODO: Fix the following code
 gapminder %>%
+   group_by(year, continent ) %>% 
+  summarize(lifeExp = mean(lifeExp)) %>% 
   filter(continent == "Asia") %>%
   ggplot(aes(year, lifeExp)) +
   geom_line()

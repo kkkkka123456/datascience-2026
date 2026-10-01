@@ -45,7 +45,7 @@ The `summarize()` function applies a user-provided *summary function* over all r
 ```{r}
 ## NOTE: No need to edit
 diamonds %>% 
-  summarize(price_mean = mean(price))
+ summarize(price_mean = mean(price))
 ```
 
 We can also compute multiple summaries at once:
@@ -53,10 +53,10 @@ We can also compute multiple summaries at once:
 ```{r}
 ## NOTE: No need to edit
 diamonds %>% 
-  summarize(
+ summarize(
     price_min = min(price),
     price_mean = mean(price),
-    price_max = max(price),
+   price_max = max(price),
   )
 ```
 
@@ -87,6 +87,9 @@ Using `summarize()` and a logical summary function, determine the number of rows
 *Hint*: We learned about checking for equality in `e-data01-isolate`.
 
 ```{r q2-task}
+df_q2<-
+  diamonds%>% 
+  summarize(n_ideal = sum(cut == "Ideal"))
 df_q2
 ```
 
@@ -130,7 +133,7 @@ The function `group_by()` modifies how other dplyr verbs function. Uncomment the
 
 ```{r q3-task}
 diamonds %>%
-  ## group_by(color, clarity) %>%
+  %% group_by(color, clarity) %>%
   summarize(price_mean = mean(price))
 ```
 
@@ -173,7 +176,7 @@ Assign the resulting tibble to `df_q4`, and assign the appropriate values to `co
 ```{r q4-task}
 ## TODO: Compute the `cov_depth` and `cov_diff` and assign the result to df_q4
 df_q4 <-
-  diamonds
+  diamonds %<% mutate(`cov_depth` = sd(depth) / mean(depth))
 df_q4
 ```
 

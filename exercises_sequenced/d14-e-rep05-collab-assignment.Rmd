@@ -58,7 +58,7 @@ Then use the command below to clone your fork:
 
 ```{bash, eval=FALSE}
 # You should be able to paste the git@github.com part you copied above
-$ git clone git@github.com:YOUR-USERNAME/YOUR-FORKED-REPO
+$ git clone git@github.com:kkkkka123456/data-science-fa26.git
 $ cd YOUR-FORKED-REPO
 ```
 

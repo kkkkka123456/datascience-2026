@@ -43,6 +43,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
+
 * Within R Markdown
 
     * `Cmd/Ctrl` + `Alt` + `I`
@@ -51,17 +52,18 @@ knitr::opts_chunk$set(echo = TRUE)
 * Within a chunk
 
     * `Shift` + `Cmd/Ctrl` + `Enter`
-
-
+    
+    
     * `Ctrl` + `I` (`Cmd` + `I`)
-
-
+    
+    
 Try this below!
 
 ```{r}
 ## Re-indent these lines
+
 c(
-  "foo",
+  # "foo",
     "bar",
       "goo",
         "gah"
