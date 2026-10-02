@@ -38,7 +38,7 @@ Make sure to commit both the challenge report (`report.md` file) and supporting 
 ```{r setup}
 library(tidyverse)
 library(gapminder)
-
+lm
 ```
 
 *Background*: [Gapminder](https://www.gapminder.org/about-gapminder/) is an
@@ -57,11 +57,14 @@ dataset?
 
 ```{r q0-task}
 ## TASK: Do your "first checks" here!
+glimpse(gapminder)
+summary(gapminder)
+gapminder
 ```
 
 **Observations**:
 
-- Write all variable names here
+- country, continent, year, lifeExp, pop, gdpPercap
 
 ### __q1__ Determine the most and least recent years in the `gapminder` dataset.
 
@@ -69,8 +72,13 @@ dataset?
 
 ```{r q1-task}
 ## TASK: Find the largest and smallest values of `year` in `gapminder`
-year_max <- NA_real_
-year_min <- NA_real_
+year_max <- gapminder %>%
+  pull(year) %>%
+  max()
+year_min <- gapminder %>%
+  pull(year) %>%
+  min()
+#sum(gapminder$country == "Mongolia")
 ```
 
 Use the following test to check your work.
@@ -96,28 +104,46 @@ You may encounter difficulties in visualizing these data; if so document your ch
 
 ```{r q2-task}
 ## TASK: Create a visual of gdpPercap vs continent
+gapminder %>%
+  filter(year == year_min) %>%
+  ggplot(aes(x = continent, y = gdpPercap)) +
+  geom_point()
+
+gapminder %>%
+  filter(year == year_min) %>%
+  ggplot(aes(x = continent, y = gdpPercap)) +
+  geom_boxplot()
+
 ```
 
 **Observations**:
 
-- Write your observations here
+- Most of the GDPpercapit's data points are concentrated, particularly in Oceania. There are several high outliers in the Americas, Europe, and Asia. Among these regions, a outlier in Asia are particularly notable. The lowest median of GDPpercapita is Afraica and highest is the Oceania. 
+
 
 **Difficulties & Approaches**:
-
-- Write your challenges and your approach to solving them
+- In some continents, the gap in GDPpercapita is much bigger than others, and it's hard to idenify which countries. And the outlier of Asia could affect the average trend if use the line graph.  
+- The box plot is easier to compare distribution of different continents and identify value like Median and outliers. 
 
 ### __q3__ You should have found *at least* three outliers in q2 (but possibly many more!). Identify those outliers (figure out which countries they are).
 
 ```{r q3-task}
 ## TASK: Identify the outliers from q2
+gapminder %>%
+  filter(year == year_min) %>%
+  arrange(desc(gdpPercap))
+
+gapminder %>%
+  filter(year == year_min) %>%
+  arrange(gdpPercap)
 ```
 
 **Observations**:
 
-- Identify the outlier countries from q2
-  - (Your response here)
-
-*Hint*: For the next task, it's helpful to know a ggplot trick we'll learn in an upcoming exercise: You can use the `data` argument inside any `geom_*` to modify the data that will be plotted *by that geom only*. For instance, you can use this trick to filter a set of points to label:
+- the boxplot of q2 show that most of the outliers tend to have high value, So I sorted the the GdpPerCapita from highest to lowest to find the outliers. The table show the most significant outlier of the boxplot belong to Kuwait in Asia is 108382.3529, followed by Switzerland in Europe is 14734.2327, United States in American is 13990.4821, and Canada in Americans is 11367.1611. Among those countries, the United Staten's population is much higher than others in 1952.
+  
+  
+  *Hint*: For the next task, it's helpful to know a ggplot trick we'll learn in an upcoming exercise: You can use the `data` argument inside any `geom_*` to modify the data that will be plotted *by that geom only*. For instance, you can use this trick to filter a set of points to label:
 
 ```{r layer-filter}
 ## NOTE: No need to edit, use ideas from this in q4 below
@@ -139,11 +165,22 @@ gapminder %>%
 
 ```{r q4-task}
 ## TASK: Create a visual of gdpPercap vs continent
+gapminder %>%
+  filter(year == year_min | year == year_max) %>% 
+  ggplot(aes(continent, gdpPercap)) +
+  geom_boxplot() +
+  geom_point(
+    data = . %>% filter(country %in% c("United States", "Kuwait", "Switzerland", "Canada","Bahrain")),
+    mapping = aes(color = country),
+    size = 2
+  ) +
+  facet_wrap(~year)
+  
 ```
 
 **Observations**:
 
-- Write your observations here
+- The GDP per capita (gdpPercap) is more widely spread across the continents in 2007, and most countries experienced an increase in GDP per capita. In the Americas, Canada and the United States appear as further outliers then 1952. In Asia, Kuwait was an extreme outlier, its GDP per capita decreased a lot compared with previous years, but it still had the highest GDP per capita in Asia. Bahrain and Switzerland are not classified as outliers in 2007, but their GDP per capita values are still above the upper quartile of their continent distributions.
 
 # Your Own EDA
 <!-- -------------------------------------------------- -->
@@ -154,20 +191,103 @@ Now it's your turn! We just went through guided EDA considering the GDP per capi
 
 ```{r q5-task1}
 ## TASK: Your first graph
+gapminder %>%
+  group_by(year) %>%
+  summarise(
+    high = max(gdpPercap),
+    low = min(gdpPercap),
+    r = high / low
+    ) %>%
+  ggplot(aes(x = year, y = r)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Year",
+    y = "GDP per capita ratio",
+  )
 ```
+- This graph shows the ratio between the highest and lowest GDP per capita every five years from 1952 to 2007, allowing us to observe how the Wealth gap of countries changes over time. The GDP ratio flow over time and do not follow a single trend like the first graph, It decrease and increase and seem like affected by some factor. The ratio start very high in 1952, and reach other peak around 1972 then decrease sharply to the low point around 1987. It increase after it and decrease at the end. 
 
-- (Your notes and observations here)
+
+```{r q5-task}
+gapminder %>%
+  group_by(year) %>%
+  filter(country != "Kuwait") %>%
+  summarise(
+    high = max(gdpPercap),
+    low = min(gdpPercap),
+    r = high / low
+    ) %>%
+  ggplot(aes(x = year, y = r)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Year",
+    y = "GDP per capita ratio",
+    title= "GDP without Kuwait"
+  )
+```
+- The first box plot from q1 show there is a extreme outlier Kuwait exist in Asia. It would impact a lot with the GDP ratio graph because it calculated only by the highest and lowest GDP per capita. This graph show the GDP per Capita ratio trend without Kuwait. and it show a smoother increasing trend of the gap getting wider between countries.The Y axis is also much smaller than the graph with Kuwait. The highest peak is over 180 and the highest peak in graph with Kuwait start over 350. The comparison of two graph show the impact of extreme data to others. 
+
+
+```{r}
+gapminder %>%
+  group_by(year, continent) %>%
+  summarise(gdp = mean(gdpPercap)) %>%
+  ggplot(aes(x = year, y = gdp, color = continent)) +
+  geom_line() +
+  geom_point()
+```
+This graph show the mean GDP per Capita of each continent's across years and allow us to compare the general trend of continent's economy. Most of the continents are continuously growing over time, except Asia decline slightly around 1972 and get back later. Oceania's GDP per Capita has consistently ranked among the highest, far exceeding other regions, follow by Europe. Asia and Americas are relatively similar and Africa is the lowest and a smaller increase compared with the other continents. This graph also show similar result of the previous graph that the Gap between highest and lowest GDP become wider over time. 
+
 
 ```{r q5-task2}
 ## TASK: Your second graph
+gapminder %>%
+  group_by(year, continent) %>%
+  summarise(pop = sum(pop)) %>%
+  ggplot(aes(x = year, y = pop, color = continent)) +
+  geom_line() +
+  geom_point()
 ```
 
-- (Your notes and observations here)
+- Most of the continent's population increase over time, but Oceania increase very little. 
+- Oceania have the lowest population all the time and highest GDP per capita, indicating that there is not a strong correlation between economic and population. 
+- Asia have the greatest population growth and always have the largest population.
+-Africa, Europe and America 's population are relatively similar. 
 
 ```{r q5-task3}
 ## TASK: Your third graph
+gapminder %>%
+  group_by(year) %>%
+  summarise(
+    high = max(lifeExp),
+    low = min(lifeExp),
+    ratio = high / low
+  ) %>%
+  ggplot(aes(x = year, y = ratio)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Year",
+    y = "life expectancy ratio",
+)
+```
+The graph show the ratio between the highest and lowest life expectancy among continents over time. The graph show the general downward trend with 2 peaks stick out suddenly and back in few years. The first peak happened around 1977 with ratio value of 2.4 approximately and the second peak occurred around around 1992 with ratio value in 3.4. The ratio value become more stable after 2000s. 
+-There is no direct correlation with other graphs, The gap between the highest and lowest life expectancy also flow over time. Just like the ratio of GDP per capita,it does not show a general trend but might influenced by factors that were not accounted for in the data set. It might be a outliner too. 
+
+```{r q5-task31}
+gapminder %>%
+  group_by(year, continent) %>%
+  summarise(life = mean(lifeExp)) %>%
+  ggplot(aes(x = year, y = life, color = continent)) +
+  geom_line() +
+  geom_point()
+
 ```
 
-- (Your notes and observations here)
+- The graph show the mean of continent's life expectancy and it look pretty similar with the graph of mean GDP per Capita of each continent, but smoother. Oceania is the highest, follow by Europe and Africa is the lowest. 
+- It's hard to explain the peaks of the ratio graph with this because this is the average graph that hide the outliers, but it show that the gap between highest and lowest life expectancy is a bit smaller. 
+
 
 
