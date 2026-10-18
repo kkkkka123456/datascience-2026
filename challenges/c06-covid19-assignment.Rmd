@@ -79,7 +79,24 @@ That's the high-level view; now let's dig into the details.
 
 ```{r q1-task}
 ## TASK: Load the census bureau data with the following tibble name.
-df_pop <- NA
+library(tidyverse)
+library(readr)
+
+df_pop <- read_csv(
+  "./data/ACSDT5Y2018.B01003-Data.csv",
+  skip = 2,
+  col_names = c(
+    "id",
+    "Geographic Area Name",
+    "Estimate!!Total",
+    "Margin of Error!!Total"
+  )
+)
+df_pop <- df_pop %>%
+  select(-X5)
+
+head(df_pop)
+
 ```
 
 *Note*: You can find information on 1-year, 3-year, and 5-year estimates [here](https://www.census.gov/programs-surveys/acs/guidance/estimates.html). The punchline is that 5-year estimates are more reliable but less current.
@@ -95,7 +112,7 @@ The New York Times is publishing up-to-date data on COVID-19 on [GitHub](https:/
 
 ```{r q2-task}
 ## TASK: Find the URL for the NYT covid-19 county-level data
-url_counties <- NA_character_
+url_counties <- "https://raw.githubusercontent.com/nytimes/covid-19-data/refs/heads/master/us-counties.csv"
 ```
 
 Once you have the url, the following code will download a local copy of the data, then load the data into R.
@@ -136,7 +153,9 @@ To join these datasets, we'll need to use [FIPS county codes](https://en.wikiped
 
 ```{r q3-task}
 ## TASK: Create a `fips` column by extracting the county code
-df_q3 <- NA
+df_q3 <- df_pop %>%
+  mutate(fips = str_extract(id, "\\d{5}$"))
+df_q3
 ```
 
 Use the following test to check your answer.
@@ -156,7 +175,9 @@ print("Very good!")
 
 ```{r q4-task}
 ## TASK: Join df_covid and df_q3 by fips.
-df_q4 <- NA
+df_q4 <- df_covid %>%
+  left_join(df_q3, by = "fips")
+glimpse(df_q4)
 ```
 
 Use the following test to check your answer.
@@ -220,7 +241,10 @@ Now that we've done the hard work of loading and wrangling the data, we can fina
 ```{r q5-task}
 ## TASK: Normalize cases and deaths
 df_normalized <-
-  df_data
+  df_data %>%
+  mutate( 
+    cases_per100k  = cases / population * 100000,
+    deaths_per100k = deaths / population * 100000 )
 ```
 
 You may use the following test to check your work.
@@ -289,12 +313,21 @@ Compute the mean and standard deviation for `cases_per100k` and `deaths_per100k`
 
 ```{r q6-task}
 ## TASK: Compute mean and sd for cases_per100k and deaths_per100k
+
+dfs <- df_normalized %>%
+  summarize(
+    casemean = mean(cases_per100k, na.rm = TRUE),
+    casesd = sd(cases_per100k, na.rm = TRUE),
+    deathmean = mean(deaths_per100k, na.rm = TRUE),
+    deathsd = sd(deaths_per100k, na.rm = TRUE)
+  )
+dfs
 ```
 
 - Which rows did you pick?
-  - (Your response here)
+  - I keep rows with vaild value for cases and deaths. 
 - Why?
-  - (Your response here)
+  - I chose these row because we could only calculate the mean and standard deviation with vailds data. The NA value can't contribute to the calculation because it can't be recognized. 
 
 ### __q7__ Find and compare the top 10
 
@@ -302,20 +335,83 @@ Find the top 10 counties in terms of `cases_per100k`, and the top 10 in terms of
 
 ```{r q7-task}
 ## TASK: Find the top 10 max cases_per100k counties; report populations as well
+top10case <- df_normalized %>%
+  arrange(desc(cases_per100k)) %>%
+  head(10)
+top10case
+
+top10case1 <- df_normalized %>%
+  filter(date == max(date, na.rm = TRUE)) %>%
+  arrange(desc(cases_per100k)) %>%
+  head(10)
+top10case1
 
 ## TASK: Find the top 10 deaths_per100k counties; report populations as well
+top10death <- df_normalized %>%
+  arrange(desc(deaths_per100k)) %>%
+  head(10)
+top10death
+
+top10death1 <- df_normalized %>%
+  filter(date == max(date, na.rm = TRUE)) %>%
+  arrange(desc(deaths_per100k)) %>%
+  head(10)
+top10death1
+
 ```
+casemean casesd deathmean deathsd
+9974.675	8448.659	174.3095	158.9641	
 
 **Observations**:
 
-- (Note your observations here!)
+- The value of Top 10 cases_per100k and deaths_per100k are come from the same location but different dates. The value of deaths_per100k is same for top10 but the cases_per100k is change slightly as the date change. The values for both “cases_per100k” and “deaths_per100k” are well above the mean. This suggests that this is unusually high compared with the overall data. It might impact by small population or other factors. 
+- The values of Top 10 cases_per100k measure on the same date, which is the last date of the dataset show the rate drop significantly from 192156.86	of Loving county, Texas to 69527.26 of Chattahoochee county, Georgia. The rates then decrease by several thousand across the remaining counties in the top 10.This suggests that Loving county, Texas's case value are unusually high compared with the overall data again. Similarly, the values of Top 10 deaths_per100k show a noticeable drop from 1359 to 1175 compare with the following counties' value.
+
 - When did these "largest values" occur?
-  - (Your response here)
+  - The largest values of cases_per100k occur in the latest day, which is May 13 2022. However the largest values of deaths_per100k occur earlier in February 2022. 
 
 ## Self-directed EDA
 <!-- ------------------------- -->
 
 ### __q8__ Drive your own ship: You've just put together a very rich dataset; you now get to explore! Pick your own direction and generate at least one punchline figure to document an interesting finding. I give a couple tips & ideas below:
+
+Is the largest population states have similar trend with the states have smallest population?
+
+```{r}
+toppop <- df_normalized %>%
+  group_by(state) %>%
+  summarise(population = mean(population, na.rm = TRUE)) %>%
+  arrange(desc(population)) %>%
+  head(3) %>%
+  pull(state)
+
+toppop
+lowpop <- df_normalized %>%
+  group_by(state) %>%
+  summarise(population = mean(population, na.rm = TRUE)) %>%
+  arrange((population)) %>%
+  head(3) %>%
+  pull(state)
+lowpop
+
+# Plot COVID-19 case rates over time for these 10 states
+df_normalized %>%
+  filter(state %in% c(toppop, lowpop)) %>%
+  group_by(state, date) %>%
+  summarise(
+     cmean = mean(cases_per100k, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  ggplot(aes(x = date, y = cmean, color = state)) +
+  geom_line() +
+  labs(
+    title = "COVID-19 Case Rates of top 3 popluation states and lowest popluation states",
+    x = "Date",
+    y = "Cases per 100,000 people"
+  )
+```
+
+The graph show states with largest waves are north Dakota and south Dakota, and next is Montana, Which are 3 state with lower population. They start later, and increase faster later time 
 
 ### Ideas
 <!-- ------------------------- -->
@@ -346,7 +442,7 @@ df_normalized %>%
     aes(date, cases_per100k, color = fct_reorder2(county, date, cases_per100k))
   ) +
   geom_line() +
-  scale_y_log10(labels = scales::label_number_si()) +
+ # scale_y_log10(labels = scales::label_number_si()) +
   scale_color_discrete(name = "County") +
   theme_minimal() +
   labs(
