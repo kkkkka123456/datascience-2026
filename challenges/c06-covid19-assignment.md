@@ -769,9 +769,15 @@ df_normalized %>%
 
 ![](c06-covid19-assignment_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-The graph show states with largest waves are north Dakota and south
-Dakota, and next is Montana, Which are 3 state with lower population.
-They start later, and increase faster later time
+The chart shows that the states with the highest peaks in the pandemic
+were North Dakota and South Dakota, followed by Montana. All three of
+the states have relatively small populations. The outbreaks in these
+states began later but grew more rapidly later. States with larger
+populations, such as the District of Columbia and Massachusetts, saw
+outbreaks begin earlier but grow more slowly. However, the number of
+confirmed cases in each state began to rise sharply in November 2020 ,
+the rate of increase slowed after January 2021. The next sharp increase
+occurred after January 2022, but stabilized very soon again.
 
 ### Ideas
 
