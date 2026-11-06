@@ -1,7 +1,7 @@
 ---
 title: "US Income"
-author: "(Your name here)"
-date: 202X-XX-XX
+author: "Kaman Chen"
+date: 2026-11-03
 output:
   github_document:
     toc: true
@@ -50,7 +50,7 @@ library(tidyverse)
 
 ```{r q1-task}
 ## TODO: Give the filename for your copy of Table B01003
-filename_pop <- NA_character_
+filename_pop <- "./data/ACSDT5Y2018.B01003-Data.csv"
 
 ## NOTE: No need to edit
 df_pop <-
@@ -80,12 +80,14 @@ This means that for cases listed as `*****` the US Census Bureau recommends trea
 
 ```{r q2-task}
 ## TODO: Give the filename for your copy of Table S1903
-filename_income <- NA_character_
+filename_income <- "./data/ACSST5Y2018.S1903-Data.csv"
 
 ## NOTE: No need to edit
 df_income <-
   read_csv(filename_income, skip = 1)
-df_income
+
+df_income 
+glimpse(df_income)
 ```
 
 Use the following test to check that you downloaded the correct file:
@@ -120,8 +122,20 @@ df_q3 <-
     contains("median") & matches("\\d-person families") & !contains("Annotation of")
   ) %>%
   mutate(across(contains("median"), as.numeric)) %>%
-## TODO: Pivot the data, rename the columns
+  pivot_longer(
+    names_to = c(".value", "category"),
+    names_pattern = "^(Estimate|Margin of Error)!!Median income \\(dollars\\)(?: MOE)?!!FAMILY INCOME BY FAMILY SIZE!!(.*)$",
+    #Margin of Error!!Median income (dollars) MOE!!FAMILY INCOME BY FAMILY SIZE!!
+    #`Estimate!!Median income (dollars)!!FAMILY INCOME BY FAMILY SIZE!!3-person families`
+    cols = -c(Geography, 'Geographic Area Name')
+  ) %>%
+  rename(
+    geographic_area_name = 'Geographic Area Name',
+    income_estimate = Estimate,
+    income_moe = 'Margin of Error'
+  ) %>%
   glimpse()
+
 ```
 
 Use the following tests to check your work:
@@ -151,8 +165,13 @@ $$\text{MOE} = 1.645 \times \text{SE}.$$
 ### __q4__ Convert the margin of error to standard error. Additionally, compute a 99% confidence interval on income, and normalize the standard error to `income_CV = income_SE / income_estimate`. Provide these columns with the names `income_SE, income_lo, income_hi, income_CV`.
 
 ```{r q4-task}
-
-df_q4
+df_q4 <- df_q3 %>%
+  mutate(
+    income_SE = income_moe / 1.645,
+    income_lo = income_estimate - qnorm(0.995) * income_SE,
+    income_hi = income_estimate + qnorm(0.995) * income_SE,
+    income_CV = income_SE / income_estimate
+  )
 ```
 
 Use the following tests to check your work:
@@ -207,8 +226,14 @@ One last wrangling step: We need to join the two datasets so we can compare popu
 
 ```{r q5-task}
 ## TODO: Join df_q4 and df_pop by the appropriate column
-
-df_data
+#Geography, Geographic Area Name, Estimate!!Total
+df_data <- 
+  df_q4 %>% 
+  left_join(
+    df_pop %>% select("population_estimate", "Geography"),
+    by = "Geography"
+  )
+ df_data 
 ```
 
 # Analysis
@@ -246,13 +271,16 @@ df_data %>%
 **Observations**:
 
 - Document your observations here.
-  - (Your response here)
-  - (Your response here)
-  - ...
+  - The range of median household income for households of five on Nantucket is very wide, spanning from the lowest to the highest in the median household income ranges of all other regions.
+  - The family incomes are very similar in Suffolk, but larger sizes of family have higher income. 
+  - The larger size of family in most of the regions have wider spin in household income. 
+  - The 5-person families and 6-person families have similar median value in most of the regions.
+  - The general range of median household income for multiple member families are over 50000 and under 175000. 
+  
 - Can you confidently distinguish between household incomes in Suffolk county? Why or why not?
-  - (Your response here)
+  - Probably not, because their median income value is close to each other. 
 - Which counties have the widest confidence intervals?
-  - (Your response here)
+  - Nantucket, because the difference between the highest value and lowest value is very large. 
 
 In the next task you'll investigate the relationship between population and uncertainty.
 
@@ -261,14 +289,26 @@ In the next task you'll investigate the relationship between population and unce
 *Hint*: Remember that standard error is a function of *both* variability (e.g. variance) and sample size.
 
 ```{r q7-task}
+df_data %>% ggplot(
+  aes(x = population_estimate, y = income_SE)
+) +
+  geom_point() +
+  geom_smooth(
+    color = "red"
+  ) +
+  scale_x_log10() +
+  labs(
+    x = "Population",
+    y = "Standard error of median income"
+  )
 ```
 
 **Observations**:
 
 - What *overall* trend do you see between `SE` and population? Why might this trend exist?
-  - (Your response here)
+  - The standard error is getting smaller as the population increase, because there are more observation into the sample and the formula of standard error also show that large value of n cause smaller SE.
 - What does this *overall* trend tell you about the relative ease of studying small vs large counties?
-  - (Your response here)
+  - Study small counties would cause larger standard error than large counties because of the sample size is smal.
 
 # Going Further
 <!-- ----------------------------------------------------------------------- -->
@@ -276,14 +316,74 @@ In the next task you'll investigate the relationship between population and unce
 Now it's your turn! You have income data for every county in the United States: Pose your own question and try to answer it with the data.
 
 ### __q8__ Pose your own question about the data. Create a visualization (or table) here, and document your observations.
+So, what is the median income for nonfamily households in Massachusetts? What is the general range? Are there significant differences in income between different towns?
 
 ```{r q8-task}
 ## TODO: Pose and answer your own question about the data
+#`Estimate!!Median income (dollars)!!NONFAMILY HOUSEHOLDS!!Nonfamily households!!Female householder!!Not living alone`                                                                     <chr> …
+# `Margin of Error!!Median income (dollars) MOE!!NONFAMILY HOUSEHOLDS!!Nonfamily households!!Female householder!!Not living alone`     <chr> …
+#`Estimate!!Median income (dollars)!!NONFAMILY HOUSEHOLDS!!Nonfamily households!!Male householder!!Living alone`                                                                           <chr> …
+# `Margin of Error!!Median income (dollars) MOE!!NONFAMILY HOUSEHOLDS!!Nonfamily households!!Male householder!!Living alone` 
+
+df_q8 <-
+  df_income %>%
+  select(
+    Geography,
+    contains("Geographic"),
+    # This will select only the numeric d-person family columns;
+    # it will ignore the annotation columns
+    contains("median") & matches("NONFAMILY HOUSEHOLDS") & !contains("Annotation of")
+  ) %>%
+  mutate(across(contains("median"), as.numeric)) %>%
+  pivot_longer(
+    names_to = c(".value", "category"),
+    names_pattern = "^(Estimate|Margin of Error)!!Median income \\(dollars\\)(?: MOE)?!!NONFAMILY HOUSEHOLDS!!Nonfamily households!!(.*)$",
+    cols = -c(Geography, 'Geographic Area Name')
+  ) %>%
+  rename(
+    geographic_area_name = 'Geographic Area Name',
+    income_estimate = Estimate,
+    income_moe = 'Margin of Error'
+  ) %>%
+  filter(!is.na(income_estimate), !is.na(income_moe)) %>%
+  glimpse()
+
+df_q9 <- df_q8 %>%
+  mutate(
+    income_SE = income_moe / 1.645,
+    income_lo = income_estimate - qnorm(0.995) * income_SE,
+    income_hi = income_estimate + qnorm(0.995) * income_SE,
+    income_CV = income_SE / income_estimate
+  )
+wid <- 0.5
+
+df_q9 %>%
+  filter(str_detect(geographic_area_name, "Massachusetts")) %>%
+  mutate(
+    county = str_remove(geographic_area_name, " County,.*$"),
+    county = fct_reorder(county, income_estimate)
+  ) %>%
+
+  ggplot(aes(county, income_estimate, color = category)) +
+  geom_errorbar(
+    aes(ymin = income_lo, ymax = income_hi),
+    position = position_dodge(width = wid)
+  ) +
+  geom_point(position = position_dodge(width = wid)) +
+
+  coord_flip() +
+  labs(
+    x = "County",
+    y = "Median Household Income"
+  )
 ```
 
 **Observations**:
 
-- Document your observations here
+- Duke County shows the widest range of data, specifically for male heads of household who do not live alone.
+- For most female household, male household , and household of all genders living alone, household income value are close to each other, but male’s income is always higher.
+- Households headed by individuals who do not live alone have higher household incomes, and the income value are closer together for most counties.
+- The data for most counties show similar overall trends, but Duke County and Nantucket County appear to be outliers in this dataset.
 
 Ideas:
 
